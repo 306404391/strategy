@@ -49,91 +49,91 @@ class StrategyOptimizer:
             
         return param_combinations
         
-    def _evaluate_parameters(self, params: Dict, 
-                           metric: str = 'sharpe_ratio',
-                           config: Dict = None) -> Tuple[Dict, float]:
-        """
-        评估单个参数组合
-        :param params: 参数字典
-        :param metric: 评估指标
-        :param config: 基础配置
-        :return: (参数字典, 评估分数)
-        """
-        try:
-            # 更新配置
-            if config is None:
-                config = {}
+    # def _evaluate_parameters(self, params: Dict, 
+    #                        metric: str = 'sharpe_ratio',
+    #                        config: Dict = None) -> Tuple[Dict, float]:
+    #     """
+    #     评估单个参数组合
+    #     :param params: 参数字典
+    #     :param metric: 评估指标
+    #     :param config: 基础配置
+    #     :return: (参数字典, 评估分数)
+    #     """
+    #     try:
+    #         # 更新配置
+    #         if config is None:
+    #             config = {}
             
-            test_config = config.copy()
+    #         test_config = config.copy()
             
-            # 更新配置中的参数
-            for key, value in params.items():
-                if '.' in key:
-                    parts = key.split('.')
-                    current_dict = test_config
+    #         # 更新配置中的参数
+    #         for key, value in params.items():
+    #             if '.' in key:
+    #                 parts = key.split('.')
+    #                 current_dict = test_config
                     
-                    for part in parts[:-1]:
-                        if part not in current_dict:
-                            current_dict[part] = {}
-                        current_dict = current_dict[part]
+    #                 for part in parts[:-1]:
+    #                     if part not in current_dict:
+    #                         current_dict[part] = {}
+    #                     current_dict = current_dict[part]
                     
-                    current_dict[parts[-1]] = value
-                else:
-                    test_config[key] = value
+    #                 current_dict[parts[-1]] = value
+    #             else:
+    #                 test_config[key] = value
             
-            # 初始化策略并生成信号
-            strategy = TradingStrategy(test_config)
-            data = self.data_fetcher.get_historical_data(test_config)
+    #         # 初始化策略并生成信号
+    #         strategy = TradingStrategy(test_config)
+    #         data = self.data_fetcher.get_historical_data(test_config)
             
-            if data is None:
-                print("Failed to get historical data, skipping this parameter combination")
-                return params, float('-inf')  # 返回一个很差的分数
+    #         if data is None:
+    #             print("Failed to get historical data, skipping this parameter combination")
+    #             return params, float('-inf')  # 返回一个很差的分数
             
-            strategy.data = data
-            strategy.indicators = Indicators(data)
-            strategy.indicators.calculate_all_indicators()
-            strategy.signals = SignalGenerator(data)
-            strategy.signals.generate_all_signals()
+    #         strategy.data = data
+    #         strategy.indicators = Indicators(data)
+    #         strategy.indicators.calculate_all_indicators()
+    #         strategy.signals = SignalGenerator(data)
+    #         strategy.signals.generate_all_signals()
             
-            # 执行回测
-            backtester = Backtester(test_config, self.initial_capital)
-            backtester.run_backtest(strategy.data)
-            results = backtester.generate_report()
+    #         # 执行回测
+    #         backtester = Backtester(test_config, self.initial_capital)
+    #         backtester.run_backtest(strategy.data)
+    #         results = backtester.generate_report()
             
-            # 计算评估分数
-            if metric == 'sharpe_ratio':
-                score = self._calculate_sharpe_ratio(results)
-            elif metric == 'profit_factor':
-                score = results['Profit Factor']
-            elif metric == 'max_drawdown':
-                score = -results['Max Drawdown (%)']
-            elif metric == 'net_profit':
-                score = results['Net Profit']
-            else:
-                raise ValueError(f"Unsupported metric: {metric}")
+    #         # 计算评估分数
+    #         if metric == 'sharpe_ratio':
+    #             score = self._calculate_sharpe_ratio(results)
+    #         elif metric == 'profit_factor':
+    #             score = results['Profit Factor']
+    #         elif metric == 'max_drawdown':
+    #             score = -results['Max Drawdown (%)']
+    #         elif metric == 'net_profit':
+    #             score = results['Net Profit']
+    #         else:
+    #             raise ValueError(f"Unsupported metric: {metric}")
             
-            return params, score
+    #         return params, score
             
-        except Exception as e:
-            print(f"Error evaluating parameters: {str(e)}")
-            return params, float('-inf')  # 返回一个很差的分数
+    #     except Exception as e:
+    #         print(f"Error evaluating parameters: {str(e)}")
+    #         return params, float('-inf')  # 返回一个很差的分数
         
-    def _calculate_sharpe_ratio(self, results: Dict) -> float:
-        """
-        计算夏普比率
-        :param results: 回测结果
-        :return: 夏普比率
-        """
-        returns = pd.Series(results['Daily Returns'])
-        risk_free_rate = 0.02  # 年化无风险利率
-        daily_rf = (1 + risk_free_rate) ** (1/252) - 1
+    # def _calculate_sharpe_ratio(self, results: Dict) -> float:
+    #     """
+    #     计算夏普比率
+    #     :param results: 回测结果
+    #     :return: 夏普比率
+    #     """
+    #     returns = pd.Series(results['Daily Returns'])
+    #     risk_free_rate = 0.02  # 年化无风险利率
+    #     daily_rf = (1 + risk_free_rate) ** (1/252) - 1
         
-        excess_returns = returns - daily_rf
-        if excess_returns.std() == 0:
-            return 0
+    #     excess_returns = returns - daily_rf
+    #     if excess_returns.std() == 0:
+    #         return 0
             
-        sharpe = np.sqrt(252) * excess_returns.mean() / excess_returns.std()
-        return sharpe
+    #     sharpe = np.sqrt(252) * excess_returns.mean() / excess_returns.std()
+    #     return sharpe
         
     def optimize(self, param_ranges: Dict[str, Union[List, range]],
                 metrics: List[str] = ['profit_factor', 'sharpe_ratio', 'max_drawdown', 'net_profit'],

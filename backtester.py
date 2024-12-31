@@ -193,8 +193,9 @@ class Backtester:
         计算最大回撤
         :return: 最大回撤百分比
         """
-        cumulative_max = pd.Series(self.equity_curve).cummax()  # 计算累计最大值
-        drawdown = (pd.Series(self.equity_curve) - cumulative_max) / cumulative_max
+        equity = pd.Series(self.equity_curve)
+        rolling_max = equity.expanding().max()  # 使用expanding()来计算截至当前的最大值
+        drawdown = (equity - rolling_max) / rolling_max
         return drawdown.min()
 
     def plot_equity_curve(self):
