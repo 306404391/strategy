@@ -1,0 +1,46 @@
+{
+    "symbol": "EURUSDz",
+    "timeframe": "H1",
+    "data_settings": {
+        "start_date": "2023-01-01",
+        "history_type": "by_bars",
+        "num_bars": 300000
+    },
+    "risk_management": {
+        "risk_percentage": 0.02,
+        "max_open_trades": 5,
+        "stop_loss_multiplier": 1.5,
+        "commission_per_lot": 7,
+        "position_sizing": {
+            "type": "fixed",
+            "fixed_volume": 1
+        }
+    },
+    "indicators": {
+        "atr_window": 14,
+        "bollinger_window": 20,
+        "bollinger_dev": 2,
+        "donchian_window": 20,
+        "keltner_ema_window": 20,
+        "keltner_atr_multiplier": 1.5,
+        "chaikin_window": 10,
+        "rvi_window": 14,
+        "rvi_signal_window": 4
+    },
+    "trading": {
+        "magic_number": 234000,
+        "deviation": 20,
+        "volume": 0.1,
+        "allow_consecutive_trades": false,
+        "exit_rules": {
+            "stop_loss": {
+                "type": "fixed",
+                "value": 5
+            },
+            "take_profit": {
+                "type": "fixed",
+                "value": 3
+            }
+        }
+    }
+}
